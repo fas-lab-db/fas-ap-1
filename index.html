@@ -12842,7 +12842,12 @@ async function saveUserProfile(event) {
     const fullName = document.getElementById('full-name').value.trim();
     const phoneNumber = document.getElementById('phone-number').value.trim();
     const address = document.getElementById('address').value.trim();
-    const customerId = document.getElementById('customer-id').value;
+    
+    let customerId = null;
+    const customerIdElement = document.getElementById('customer-id');
+    if (customerIdElement) {
+        customerId = customerIdElement.value;
+    }
     
     if (!fullName) {
         alert('Please enter your full name');
@@ -12869,7 +12874,6 @@ async function saveUserProfile(event) {
         let saveError;
         
         if (existingProfile) {
-
             const { error } = await supabase
                 .from('user_profiles')
                 .update({
@@ -12882,6 +12886,10 @@ async function saveUserProfile(event) {
             
             saveError = error;
         } else {
+            if (!customerId) {
+                customerId = await generateUniqueCustomerId();
+            }
+            
             const { error } = await supabase
                 .from('user_profiles')
                 .insert([{
@@ -12905,7 +12913,7 @@ async function saveUserProfile(event) {
         
     } catch (error) {
         console.error("Error saving user profile:", error);
-        showToast('Error saving profile', 'error');
+        showToast('Error saving profile: ' + (error.message || 'Unknown error'), 'error');
     }
 }
 
